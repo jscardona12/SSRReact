@@ -4,27 +4,47 @@ const User = require('../models/user_model');
 var path = require('path');
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import App from '../app';
+import App from '../app/components/index';
 import template from '../template';
 /* GET users listing. */
 //router.get('/', function(req, res, next) {
 //  res.send('respond with a resource');
 //});
 router.get('/', function (req, res, next) {
-    //console.log(req.session)
-    //if(req.session.userId)
-    //    return res.redirect('/profile');
-    //else
-    //    return res.sendFile(path.join(__dirname + '/../templateLogReg/index.html'));
-  const isMobile = true;
-  const initialState = { isMobile };
-  const appString = renderToString(<App {...initialState} />);
 
-  res.send(template({
-    body: appString,
-    title: 'Hello World from the server',
-    initialState: JSON.stringify(initialState)
-  }));
+    User.findById(req.session.userId)
+        .exec(function (error, user) {
+            const u = user;
+            if (error) {
+                return next(error);
+            } else {
+                if (user === null) {
+                    const isMobile = true;
+                    const user = null;
+                    const initialState = { isMobile,user };
+                    const appString = renderToString(<App {...initialState} />);
+                    res.send(template({
+                        body: appString,
+                        title: 'Admin Panel Home',
+                        initialState: JSON.stringify(initialState)
+                    }));
+                } else {
+                    console.log(req.session.userId);
+
+                    const isMobile = true;
+                    console.log(user);
+                    const initialState = { isMobile,user };
+                    const appString = renderToString(<App {...initialState} />);
+
+                    res.send(template({
+                        body: appString,
+                        title: 'Admin Panel Home',
+                        initialState: JSON.stringify(initialState)
+                    }));
+                }
+            }
+        });
+
 
 });
 
@@ -88,6 +108,7 @@ router.get('/profile', function (req, res, next) {
                     err.status = 400;
                     return next(err);
                 } else {
+                    console.log(user);
                     return res.send('<h1>Name: </h1>' + user.username + '<h2>Mail: </h2>' + user.email + '<br><a type="button" href="/logout">Logout</a>')
                 }
             }
