@@ -41,7 +41,7 @@ export default class Header extends Component {
                             : <div></div>
                         }
                         {this.props.user ?
-                            <li className="nav-item" ><a  className="nav-link" href="/" id="navbar-list">Sign Out</a></li>:
+                            <li className="nav-item" ><a  className="nav-link" href="/logout" id="navbar-list">Sign Out</a></li>:
                             <div></div>
                         }
 

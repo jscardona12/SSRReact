@@ -57,7 +57,7 @@ export default class Home extends Component {
                                            })
                                        }} required/>
                                 <div className="row">
-                                    {this.state.user.role === "Admin"?
+                                    {(this.props.user && this.props.user.role === "Admin")?
                                         <div id="marginl" className="col-xs-3">
                                             <MuiThemeProvider>
                                                 <AccountsUIWrapperHome />

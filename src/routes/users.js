@@ -6,6 +6,9 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import App from '../app/components/index';
 import template from '../template';
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 /* GET users listing. */
 //router.get('/', function(req, res, next) {
 //  res.send('respond with a resource');
@@ -19,9 +22,9 @@ router.get('/', function (req, res, next) {
                 return next(error);
             } else {
                 if (user === null) {
-                    const isMobile = true;
+                    const path = "Home";
                     const user = null;
-                    const initialState = { isMobile,user };
+                    const initialState = { path,user };
                     const appString = renderToString(<App {...initialState} />);
                     res.send(template({
                         body: appString,
@@ -29,11 +32,19 @@ router.get('/', function (req, res, next) {
                         initialState: JSON.stringify(initialState)
                     }));
                 } else {
+                    const msg = {
+                        to: 'js.cardona64@gmail.com',
+                        from: 'juans.cardona@catarte.com.co',
+                        subject: 'Sending with SendGrid is Fun',
+                        text: 'and easy to do anywhere, even with Node.js',
+                        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+                    };
+                    sgMail.send(msg);
                     console.log(req.session.userId);
 
-                    const isMobile = true;
+                    const path = "Home"
                     console.log(user);
-                    const initialState = { isMobile,user };
+                    const initialState = { path,user };
                     const appString = renderToString(<App {...initialState} />);
 
                     res.send(template({
@@ -51,27 +62,27 @@ router.get('/', function (req, res, next) {
 //POST route for updating data
 router.post('/', function (req, res, next) {
     // confirm that user typed same password twice
-    if (req.body.password !== req.body.passwordConf) {
-        var err = new Error('Passwords do not match.');
-        err.status = 400;
-        res.send("passwords dont match");
-        return next(err);
-    }
+
+    console.log(req.body);
 
     if (req.body.email &&
-        req.body.username &&
+        req.body.nombres &&
         req.body.password &&
-        req.body.passwordConf) {
+        req.body.apellidos &&
+        req.body.role) {
 
         var userData = {
+            nombres: req.body.nombres,
+            apellidos: req.body.apellidos,
             email: req.body.email,
-            username: req.body.username,
             password: req.body.password,
-            passwordConf: req.body.passwordConf,
+            role: req.body.role
         }
+        console.log(userData);
 
         User.create(userData, function (error, user) {
             if (error) {
+                console.log(error);
                 return next(error);
             } else {
                 req.session.userId = user._id;
@@ -87,7 +98,7 @@ router.post('/', function (req, res, next) {
                 return next(err);
             } else {
                 req.session.userId = user._id;
-                return res.redirect('/profile');
+                return res.redirect('/platos');
             }
         });
     } else {
@@ -97,19 +108,28 @@ router.post('/', function (req, res, next) {
     }
 });
 
-router.get('/profile', function (req, res, next) {
+router.get('/platos', function (req, res, next) {
     User.findById(req.session.userId)
         .exec(function (error, user) {
             if (error) {
                 return next(error);
             } else {
                 if (user === null) {
-                    var err = new Error('Not authorized! Go back!');
+                    var err = new Error('Not authorized! Go back and LogIn');
                     err.status = 400;
                     return next(err);
                 } else {
+                    const path = "Platos"
                     console.log(user);
-                    return res.send('<h1>Name: </h1>' + user.username + '<h2>Mail: </h2>' + user.email + '<br><a type="button" href="/logout">Logout</a>')
+                    const initialState = { path,user };
+                    const appString = renderToString(<App {...initialState} />);
+
+                    res.send(template({
+                        body: appString,
+
+                        title: 'Admin Panel Platos',
+                        initialState: JSON.stringify(initialState)
+                    }));
                 }
             }
         });

@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Modal from 'react-modal';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
+import axios from 'axios';
 
 const customStyles = {
     content: {
@@ -52,27 +53,28 @@ export default class AccountsUIWrapperHome extends Component {
             <MenuItem
                 key={name}
                 insetChildren={true}
-                checked={values && values.indexOf(name) > -1}
                 value={name}
                 primaryText={name}
             />
         ));
     }
 
-    registerUser() {
+    registerUser(e) {
+        e.preventDefault();
         console.log("ENTRO");
         var state = this.state
         var props = this.props;
         if (this.state.password === this.state.cpassword) {
-            var formData = new FormData();
-            formData.append('nombres',this.state.name);
-            formData.append('apellidos',this.state.lastname);
-            formData.append('email',this.state.email);
-            formData.append('password',this.state.password);
-            formData.append('role',this.state.role);
+            var formData = {
+                nombres: this.state.name,
+            apellidos: this.state.lastname,
+            email: this.state.email,
+            password: this.state.password,
+            role:this.state.value
+        };
 
             console.log("HEY");
-            console.log(this.props );
+            console.log(formData);
 
             axios.post("/", formData).then(function () {
                 console.log("ok");
@@ -85,6 +87,7 @@ export default class AccountsUIWrapperHome extends Component {
             console.log("T P A N T S");
             alert("The passwords are not the same");
         }
+
     }
 
     openModal() {
@@ -151,7 +154,7 @@ export default class AccountsUIWrapperHome extends Component {
                                     multiple={false}
                                     hintText="Select"
                                     value={value}
-                                    onChange={this.handleChange}
+                                    onChange={this.handleChange.bind(this)}
                                 >
                                     {this.menuItems(value)}
                                 </SelectField>
